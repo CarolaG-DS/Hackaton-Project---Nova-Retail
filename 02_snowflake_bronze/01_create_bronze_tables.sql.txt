@@ -1,0 +1,62 @@
+-- Create DB
+CREATE DATABASE IF NOT EXISTS NOVA_RETAIL;
+RENAME 
+
+-- Create 3 schemas: bronze, silver and gold layer
+CREATE SCHEMA IF NOT EXISTS NOVA_RETAIL.BRONZE;
+CREATE SCHEMA IF NOT EXISTS NOVA_RETAIL.SILVER;
+CREATE SCHEMA IF NOT EXISTS NOVA_RETAIL.GOLD;
+
+-- Check schemas
+SHOW SCHEMAS IN DATABASE NOVA_RETAIL;
+
+-- data ingestion in knime then connection to snowflake
+-- checking all the tables
+-- 1. counting the rows for sales transactions
+SELECT COUNT(*) AS TOTAL_ROWS
+FROM NOVA_RETAIL.BRONZE.RAW_SALES_TRANSACTIONS;
+
+-- 2. raw transactions first 10 rows
+SELECT * 
+FROM NOVA_RETAIL.BRONZE.RAW_SALES_TRANSACTIONS 
+LIMIT 10;
+
+-- 1. Total reviews
+SELECT COUNT(*) AS TOTALE_RECENSIONI
+FROM NOVA_RETAIL.BRONZE.RAW_WEB_REVIEWS;
+
+-- 2. Reviews first 10 rows
+SELECT * 
+FROM NOVA_RETAIL.BRONZE.RAW_WEB_REVIEWS 
+LIMIT 10;
+
+-- Total rows in finance targets
+SELECT COUNT(*) AS TOTALE_TARGET
+FROM NOVA_RETAIL.BRONZE.RAW_FINANCE_TARGETS;
+
+-- finance targets first 10 rows
+SELECT * 
+FROM NOVA_RETAIL.BRONZE.RAW_FINANCE_TARGETS 
+LIMIT 10;
+
+
+SELECT * 
+FROM NOVA_RETAIL.GOLD.DIM_CUSTOMERS
+LIMIT 10;
+
+USE ROLE ACCOUNTADMIN;
+USE DATABASE NOVA_RETAIL;
+USE SCHEMA BRONZE;
+
+CREATE OR REPLACE TABLE BRONZE.RAW_EXCHANGE_RATES (
+    currency_code VARCHAR(3),
+    exchange_rate_to_eur NUMBER(10,6),
+    effective_date DATE
+);
+
+INSERT INTO BRONZE.RAW_EXCHANGE_RATES
+    (currency_code, exchange_rate_to_eur, effective_date)
+VALUES
+    ('EUR', 1.000000, '2023-12-31'),
+    ('USD', 0.924000, '2023-12-31'),
+    ('GBP', 1.149000, '2023-12-31');
